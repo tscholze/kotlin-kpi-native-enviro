@@ -1,22 +1,19 @@
-[![official JetBrains project](https://jb.gg/badges/official-plastic.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
-[![Kotlin](https://img.shields.io/badge/Kotlin-1.9.20-blue.svg?style=flat&logo=kotlin)](https://kotlinlang.org)
+# Kpi.KEnviro
 
-# Kotlin/Native Template
-
-A mostly-empty template to get started creating a Kotlin/Native project. 
-
-## Getting Started
-
-1. On the project page, click on the `Use this template` button
-2. Click on the `Create a new repository` drop-down item
-3. Fill in the details of the new repository you'll be creating under your account
-4. Click the `Create repository` button
-5. Browse to your repository and make the needed changes there.
-
-## Code of conduct
-
-Please read [our code of conduct](https://github.com/jetbrains#code-of-conduct).
+sudo apt-get install libgpiod2 libi2c0
 
 ## License
 
-This project is licensed under the Apache 2.0 License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE](LICENSE.md) file for details.
+Dependencies or assets maybe licensed differently.
+
+Enviro pHAT includes:
+An LSM303D accelerometer/magnetometer for detecting orientation, motion and heading
+A BMP280 temperature/pressure sensor
+A TCS3472 colour sensor, for detecting the amount and colour of light
+An ADS1015 analog sensor with four 3.3v tolerant channels for your external sensors
+A 5v power supply pin for powering your sensors, which you can regulate or divide to 3v if needed
+Two LEDs connected to GPIO #4 for illuminating objects over the colour sensor
+
+https://github.com/taartspi/pi4j-example-devices/blob/master/src/main/java/com/pi4j/devices/bmp280/BMP280Device.java
+https://github.com/androidthings/contrib-drivers/blob/master/bmx280/src/main/java/com/google/android/things/contrib/driver/bmx280/Bmx280.java
