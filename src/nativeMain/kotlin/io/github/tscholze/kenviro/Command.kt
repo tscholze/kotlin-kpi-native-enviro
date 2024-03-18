@@ -1,8 +1,8 @@
-package io.github.tscholze.kenviro.bmp280
+package io.github.tscholze.kenviro
 
 /**
  * Defines all available action that the
- * [BMP280] can be requested for.
+ * [Enviro] can be requested for.
  */
 sealed class Command {
     /** Turns all LEDs on with a bright white color on */
