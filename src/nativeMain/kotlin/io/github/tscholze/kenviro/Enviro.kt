@@ -1,7 +1,6 @@
 package io.github.tscholze.kenviro
 
 import io.github.tscholze.kenviro.bmp280.BMP280
-import io.github.tscholze.kenviro.bmp280.Command
 import io.ktgp.I2c
 import io.ktgp.use
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -20,7 +19,8 @@ class Enviro {
 
                 //  manage
                 val bmp280 = BMP280(i2c, actions)
-                println(bmp280.getTemperature())
+                println("Temp: " + bmp280.readTemperature())
+                println("Pressure: " + bmp280.readPressure())
                 bmp280.close()
             }
 

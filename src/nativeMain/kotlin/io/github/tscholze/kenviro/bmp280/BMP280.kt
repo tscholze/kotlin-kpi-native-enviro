@@ -3,6 +3,7 @@ package io.github.tscholze.kenviro.bmp280
 import io.github.tscholze.kenviro.Command
 import io.github.tscholze.kenviro.utils.toInt
 import io.ktgp.i2c.I2c
+import kotlinx.cinterop.objc_retain
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 /**
@@ -55,7 +56,7 @@ class BMP280(
 
     // MARK: - Getters -
 
-    fun getTemperature(asFinite: Boolean = false): Double {
+    fun readTemperature(asFinite: Boolean = false): Double {
         val msb = device.read(REGISTER_MSB_TEMPERATURE, 1U).toInt()
         val lsb = device.read(REGISTER_LSB_TEMPERATURE, 1U).toInt()
         val xlsb = device.read(REGISTER_XLSB_TEMPERATURE, 1U).toInt()
@@ -77,35 +78,27 @@ class BMP280(
     }
 
     fun readPressure(): Double {
-
-        val temperature = getTemperature(asFinite = true)
+        val temperature = readTemperature(asFinite = true)
 
         val msb = device.read(REGISTER_MSB_PRESSURE, 1U).toInt()
         val lsb = device.read(REGISTER_LSB_PRESSURE, 1U).toInt()
         val xlsb = device.read(REGISTER_XLSB_PRESSURE, 1U).toInt()
         val rawValue = (msb shl 12) + (lsb shl 4) + (xlsb shr 4)
 
-        val pressure = 1048576 - rawValue
+        var part1 = temperature / 2 - 64000
+        var part2 = part1 * part1 * calibrationInformation.pressure6 / 32768
+        part2 += part1 * calibrationInformation.pressure5 * 2
+        part2 = part2 / 4 + calibrationInformation.pressure4 * 65536
+        part1 = calibrationInformation.pressure3 * part1 * part1 / 524288 + calibrationInformation.pressure2 * part1 / 524288
+        part1 = (1 + part1 / 32768) * calibrationInformation.pressure1
+        // 0
+        var pressure = 1048576.0 - rawValue
+        pressure = (pressure - (part2 / 4096.0)) * 6250.0 / part1
+        part1 = calibrationInformation.pressure9 * pressure * pressure / 2147483648.0
+        part2 = pressure * calibrationInformation.pressure8 / 32768.0
+        pressure += (part1 + part2 + calibrationInformation.pressure7) / 16
 
-
-        float var1 =(fineTemperature / 2.0f) - 64000.0f;
-        float var2 = var1 * var1 *((float) dig_P6) / 32768.0f;
-        var2 = var2 + var1 * ((float) dig_P5) * 2.0f;
-        var2 = (var2 / 4.0f) + (((float) dig_P4) * 65536.0f);
-        var1 = (((float) dig_P3) * var1 * var1 / 524288.0f + ((float) dig_P2) * var1) / 524288.0f;
-        var1 = (1.0f + var1 / 32768.0f) * ((float) dig_P1);
-        if (var1 == 0.0) {
-            return 0; // avoid exception caused by division by zero
-        }
-        float p = 1048576.0f-(float) rawPressure;
-        p = (p - (var2 / 4096.0f)) * 6250.0f / var1;
-        var1 = ((float) dig_P9) * p * p / 2147483648.0f;
-        var2 = p * ((float) dig_P8) / 32768.0f;
-        p = p + (var1 + var2 + ((float) dig_P7)) / 16.0f;
-        // p is in Pa, convert to hPa
-        return p / 100.0f;
-
-        return 0.0
+        return pressure / 100
     }
     /*
             public double ReadPressure()
