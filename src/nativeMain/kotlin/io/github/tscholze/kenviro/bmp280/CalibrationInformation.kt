@@ -10,27 +10,27 @@ data class CalibrationInformation(
     /** Calibration value for the first temperature digit. */
     val temperature1: Int,
     /**  Calibration value for the second temperature digit. */
-    val temperature2: Int,
+    val temperature2: Short,
     /**  Calibration value for the third temperature digit. */
-    val temperature3: Int,
+    val temperature3: Short,
     /** Calibration value for the first pressure digit. */
     val pressure1: Int,
     /** Calibration value for the second pressure digit. */
-    val pressure2: Int,
+    val pressure2: Short,
     /** Calibration value for the third pressure digit. */
-    val pressure3: Int,
+    val pressure3: Short,
     /** Calibration value for the fourth pressure digit. */
-    val pressure4: Int,
+    val pressure4: Short,
     /** Calibration value for the fifth pressure digit. */
-    val pressure5: Int,
+    val pressure5: Short,
     /** Calibration value for the sixth pressure digit. */
-    val pressure6: Int,
+    val pressure6: Short,
     /** Calibration value for the seventh pressure digit. */
-    val pressure7: Int,
+    val pressure7: Short,
     /** Calibration value for the eigth pressure digit. */
-    val pressure8: Int,
+    val pressure8: Short,
     /** Calibration value for the ninth pressure digit. */
-    val pressure9: Int,
+    val pressure9: Short,
 ) {
     override fun toString(): String {
         return """
@@ -50,37 +50,3 @@ data class CalibrationInformation(
         """.trimIndent()
     }
 }
-
-
-/**
- * KN
- * t1: 27234
- * t2: 25444
- * t3: 50
- * ----
- * p1: 37768
- * p2: 54759
- * p3: 3024
- * p4: 7652
- * p5: 65296
- * p6: 65529
- * p7: 15500
- * p8: 50936
- * p9: 6000
- */
-
-/* Python output
-t1: 27234
-t2: 25444
-t3: 50
----
-p1: 37768
-p2: -10777
-p3: 3024
-p4: 7652
-p5: -240
-p6: -7
-p7: 15500
-p8: -14600
-p9: 6000
- */

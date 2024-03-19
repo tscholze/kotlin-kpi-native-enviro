@@ -4,6 +4,7 @@ import io.github.tscholze.kenviro.Command
 import io.github.tscholze.kenviro.utils.toInt
 import io.ktgp.i2c.I2c
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlin.math.pow
 
 /**
  * Represents an BMP280 chip manager.
@@ -31,7 +32,7 @@ class BMP280(
 
     init {
         // Check if correct I2C has been found.
-        val signature = device.read(REGISTER_CHIPID.toUByte(), 1U)
+        val signature = device.read(REGISTER_CHIP_ID.toUByte(), 1U)
         if (signature.toInt() != BMP280_SIGNATURE) {
             throw RuntimeException("Found signature $signature but must be $BMP280_SIGNATURE")
         }
@@ -39,22 +40,27 @@ class BMP280(
         // Get calibration information for sensors
         calibration = CalibrationInformation(
             device.read(REGISTER_DIGIT_TEMPERATURE_1, 2U).toInt() and 0xffff,
-            device.read(REGISTER_DIGIT_TEMPERATURE_2, 2U).toInt(),
-            device.read(REGISTER_DIGIT_TEMPERATURE_3, 2U).toInt(),
+            device.read(REGISTER_DIGIT_TEMPERATURE_2, 2U).toInt().toShort(),
+            device.read(REGISTER_DIGIT_TEMPERATURE_3, 2U).toInt().toShort(),
             device.read(REGISTER_DIGIT_PRESSURE_1, 2U).toInt() and 0xffff,
-            device.read(REGISTER_DIGIT_PRESSURE_2, 2U).toInt(),
-            device.read(REGISTER_DIGIT_PRESSURE_3, 2U).toInt(),
-            device.read(REGISTER_DIGIT_PRESSURE_4, 2U).toInt(),
-            device.read(REGISTER_DIGIT_PRESSURE_5, 2U).toInt(),
-            device.read(REGISTER_DIGIT_PRESSURE_6, 2U).toInt(),
-            device.read(REGISTER_DIGIT_PRESSURE_7, 2U).toInt(),
-            device.read(REGISTER_DIGIT_PRESSURE_8, 2U).toInt(),
-            device.read(REGISTER_DIGIT_PRESSURE_9, 2U).toInt()
+            device.read(REGISTER_DIGIT_PRESSURE_2, 2U).toInt().toShort(),
+            device.read(REGISTER_DIGIT_PRESSURE_3, 2U).toInt().toShort(),
+            device.read(REGISTER_DIGIT_PRESSURE_4, 2U).toInt().toShort(),
+            device.read(REGISTER_DIGIT_PRESSURE_5, 2U).toInt().toShort(),
+            device.read(REGISTER_DIGIT_PRESSURE_6, 2U).toInt().toShort(),
+            device.read(REGISTER_DIGIT_PRESSURE_7, 2U).toInt().toShort(),
+            device.read(REGISTER_DIGIT_PRESSURE_8, 2U).toInt().toShort(),
+            device.read(REGISTER_DIGIT_PRESSURE_9, 2U).toInt().toShort()
         )
     }
 
     // MARK: - Getters -
 
+    /**
+     * Returns the current temperature in Celsius from the sensor data
+     *
+     * @param asFinite If true, the returned has not been transformed to human-readable value. Default value: false.
+     */
     fun readTemperature(asFinite: Boolean = false): Double {
         val msb = device.read(REGISTER_MSB_TEMPERATURE, 1U).toInt()
         val lsb = device.read(REGISTER_LSB_TEMPERATURE, 1U).toInt()
@@ -76,71 +82,44 @@ class BMP280(
         }
     }
 
+    /**
+     * Returns the current pressure in hPa
+     */
     fun readPressure(): Double {
         val temperature = readTemperature(asFinite = true)
-
         val msb = device.read(REGISTER_MSB_PRESSURE, 1U).toInt()
         val lsb = device.read(REGISTER_LSB_PRESSURE, 1U).toInt()
         val xlsb = device.read(REGISTER_XLSB_PRESSURE, 1U).toInt()
         val rawValue = (msb shl 12) + (lsb shl 4) + (xlsb shr 4)
 
-        var part1 = temperature / 2 - 64000
-        var part2 = part1 * part1 * calibration.pressure6 / 32768
+        var part1 = temperature / 2.0 - 64000.0
+        var part2 = part1 * part1 * calibration.pressure6 / 32768.0
         part2 += part1 * calibration.pressure5 * 2
-        part2 = part2 / 4 + calibration.pressure4 * 65536
-        part1 = calibration.pressure3 * part1 * part1 / 524288 + calibration.pressure2 * part1 / 524288
-        part1 = (1 + part1 / 32768) * calibration.pressure1
-        // 0
+        part2 = part2 / 4.0 + calibration.pressure4 * 65536.0
+        part1 = (calibration.pressure3 * part1 * part1 / 524288.0 + calibration.pressure2 * part1) / 524288.0
+        part1 = (1.0 + part1 / 32768.0) * calibration.pressure1
         var pressure = 1048576.0 - rawValue
-        pressure = (pressure - (part2 / 4096.0)) * 6250.0 / part1
+        pressure = (pressure - part2 / 4096.0) * 6250.0 / part1
         part1 = calibration.pressure9 * pressure * pressure / 2147483648.0
         part2 = pressure * calibration.pressure8 / 32768.0
-        pressure += (part1 + part2 + calibration.pressure7) / 16
+        pressure += (part1 + part2 + calibration.pressure7) / 16.0
 
         return pressure / 100
     }
-    /*
-            public double ReadPressure()
-    {
-        // Ensure BMP280 has been initialzed.
-        if (!isInitialized)
-        {
-            Logger.Log(this, "BMP has not been initialized, yet. Call `InitializeAsync()` at very first operation.");
-            return 0;
-        }
 
-        // Current temperature is required for pressure meassurement.
-        var temperature = ReadTemperature(true);
-
-        // Get byte values from I2C device.
-        byte msb = ReadByte(REGISTER_MSB_PRESSURE);
-        byte lsb = ReadByte(REGISTER_LSB_PRESSURE);
-        byte xlsb = ReadByte(REGISTER_XLSB_PRESSURE);
-
-        // Combine values into raw preassure value.
-        int rawValue = (msb << 12) + (lsb << 4) + (xlsb >> 4);
-        long pressure = 1048576 - rawValue;
-
-        // Transform it into a humanreadble value.
-        // It uses the compensation formula in the BMP280 datasheet.
-        long part1 = Convert.ToInt64(temperature) / 2 - 64000;
-        long part2 = part1 * part1 * calibrationInformation.Pressure6 / 32768;
-        part2 += part1 * calibrationInformation.Pressure5 * 2;
-        part2 = part2 / 4 + (calibrationInformation.Pressure5 * 65536);
-        part1 = (calibrationInformation.Pressure3 * part1 * part1 / 524288 + calibrationInformation.Pressure2 * part1) / 524288;
-        part1 = (1 + part1 / 32768) * calibrationInformation.Pressure1;
-
-        // Perform calibration operations according to datasheet.
-        pressure = (pressure - part2 / 4096) * 6250 / part1;
-        part1 = calibrationInformation.Pressure9 * pressure * pressure / 2147483648;
-        part2 = pressure * calibrationInformation.Pressure8 / 32768;
-        pressure += (part1 + part2 + calibrationInformation.Pressure7) / 16;
-
-        // Conver from pA to hPa.
-        pressure /= 100;
-        return pressure;
-    }
+    /**
+     * Returns the meters above-normal (sea level).
+     * It assumes, the QNH is 1018 (Munich, Bavaria, Germany)
      */
+    fun readAltitude(): Double {
+        val temperature = readTemperature()
+        val pressure = readPressure()
+
+        val part1 = (QNH_MUNICH / pressure).pow(1 / 5.257) - 1
+        val part2 = (temperature + 273.15) / 0.0065
+
+        return part1 * part2
+    }
 
     fun close() {
         i2c.close()
@@ -156,10 +135,7 @@ class BMP280(
         private const val BMP280_SIGNATURE = 0x58
 
         /** Chip ID of the BMP280. */
-        private const val REGISTER_CHIPID = 0xD0
-
-        /**  Control register of the BMP280. */
-        private const val REGISTER_CONTROL = 0xF4
+        private const val REGISTER_CHIP_ID = 0xD0
 
         /**  I2C register for the first digit of the temperature measurement. */
         private const val REGISTER_DIGIT_TEMPERATURE_1: UByte = 0x88U
@@ -214,5 +190,8 @@ class BMP280(
 
         /** Gets the bits between msb and lsb of the pressure measurement.*/
         private const val REGISTER_XLSB_PRESSURE: UByte = 0xF9U
+
+        /** QNH value of Munich, Bavaria, Germany. */
+        private const val QNH_MUNICH = 1018
     }
 }

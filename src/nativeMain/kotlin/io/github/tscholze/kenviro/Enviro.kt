@@ -19,8 +19,10 @@ class Enviro {
 
                 //  manage
                 val bmp280 = BMP280(i2c, actions)
-                println("Temp: " + bmp280.readTemperature())
-                println("Pressure: " + bmp280.readPressure())
+                println("Temp: ${bmp280.readPressure()} C")
+                println("Pressure: ${bmp280.readPressure()} hPa")
+                println("Altitude: ${bmp280.readAltitude()} m NN")
+
                 bmp280.close()
             }
 

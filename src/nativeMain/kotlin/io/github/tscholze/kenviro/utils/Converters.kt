@@ -1,6 +1,10 @@
 package io.github.tscholze.kenviro.utils
 
 
+/**
+ * Converts [this] to an [Int].
+ * After each element (byte) a bit shift of 8 will happen,
+ */
 fun UByteArray.toInt(): Int {
     var result = 0
     var shift = 0
