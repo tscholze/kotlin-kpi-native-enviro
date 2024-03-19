@@ -3,7 +3,6 @@ package io.github.tscholze.kenviro.bmp280
 import io.github.tscholze.kenviro.Command
 import io.github.tscholze.kenviro.utils.toInt
 import io.ktgp.i2c.I2c
-import kotlinx.cinterop.objc_retain
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 /**
@@ -25,8 +24,8 @@ class BMP280(
     /** I2C device of the BMP2080 */
     private val device = this.i2c.device(BMP280_ADDRESS.toUInt())
 
-    /** Required calibriation information for BMP 280 sensors */
-    private val calibrationInformation: CalibrationInformation
+    /** Required calibration information for BMP 280 sensors */
+    private val calibration: CalibrationInformation
 
     // MARK: - Init -
 
@@ -38,7 +37,7 @@ class BMP280(
         }
 
         // Get calibration information for sensors
-        calibrationInformation = CalibrationInformation(
+        calibration = CalibrationInformation(
             device.read(REGISTER_DIGIT_TEMPERATURE_1, 2U).toInt() and 0xffff,
             device.read(REGISTER_DIGIT_TEMPERATURE_2, 2U).toInt(),
             device.read(REGISTER_DIGIT_TEMPERATURE_3, 2U).toInt(),
@@ -64,9 +63,9 @@ class BMP280(
 
         // Apply compensation formula from the BMP280 datasheet.
         val part1 =
-            ((rawValue / 16384.0) - (calibrationInformation.temperature1 / 1024.0)) * calibrationInformation.temperature2
+            ((rawValue / 16384.0) - (calibration.temperature1 / 1024.0)) * calibration.temperature2
         val part2 =
-            (rawValue / 131072.0 - calibrationInformation.temperature1 / 8192.0) * (rawValue / 131072.0 - calibrationInformation.temperature2 / 8192.0) * calibrationInformation.temperature3
+            (rawValue / 131072.0 - calibration.temperature1 / 8192.0) * (rawValue / 131072.0 - calibration.temperature2 / 8192.0) * calibration.temperature3
 
         // Return finite value or transformed
         val finiteValue = part1 + part2
@@ -86,17 +85,17 @@ class BMP280(
         val rawValue = (msb shl 12) + (lsb shl 4) + (xlsb shr 4)
 
         var part1 = temperature / 2 - 64000
-        var part2 = part1 * part1 * calibrationInformation.pressure6 / 32768
-        part2 += part1 * calibrationInformation.pressure5 * 2
-        part2 = part2 / 4 + calibrationInformation.pressure4 * 65536
-        part1 = calibrationInformation.pressure3 * part1 * part1 / 524288 + calibrationInformation.pressure2 * part1 / 524288
-        part1 = (1 + part1 / 32768) * calibrationInformation.pressure1
+        var part2 = part1 * part1 * calibration.pressure6 / 32768
+        part2 += part1 * calibration.pressure5 * 2
+        part2 = part2 / 4 + calibration.pressure4 * 65536
+        part1 = calibration.pressure3 * part1 * part1 / 524288 + calibration.pressure2 * part1 / 524288
+        part1 = (1 + part1 / 32768) * calibration.pressure1
         // 0
         var pressure = 1048576.0 - rawValue
         pressure = (pressure - (part2 / 4096.0)) * 6250.0 / part1
-        part1 = calibrationInformation.pressure9 * pressure * pressure / 2147483648.0
-        part2 = pressure * calibrationInformation.pressure8 / 32768.0
-        pressure += (part1 + part2 + calibrationInformation.pressure7) / 16
+        part1 = calibration.pressure9 * pressure * pressure / 2147483648.0
+        part2 = pressure * calibration.pressure8 / 32768.0
+        pressure += (part1 + part2 + calibration.pressure7) / 16
 
         return pressure / 100
     }
