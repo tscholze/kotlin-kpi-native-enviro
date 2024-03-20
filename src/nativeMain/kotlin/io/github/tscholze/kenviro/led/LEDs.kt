@@ -1,9 +1,7 @@
 package io.github.tscholze.kenviro.led
 
-import io.github.tscholze.kenviro.Command
 import io.ktgp.gpio.Gpio
 import io.ktgp.gpio.PinState
-import kotlinx.coroutines.flow.MutableSharedFlow
 
 /**
  * Represents two LEDs besides the tcs3472 sensor.
@@ -13,12 +11,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
  * After usage the method [close] shall be called to clean up I2C usage.
  *
  * @param gpio Gpio Controller to access pins.
- * @param actions Flow that shall be listened to for requested actions
  */
-class LEDs(
-        gpio: Gpio,
-        private var actions: MutableSharedFlow<Command>,
-    ) {
+class LEDs(gpio: Gpio) {
 
     // MARK: - Private properties -
 
@@ -38,5 +32,11 @@ class LEDs(
      */
     fun turnOff() {
         output.setState(PinState.LOW)
+    }
+
+    // MARK: - System -
+
+    fun shutdown() {
+        output.close()
     }
 }

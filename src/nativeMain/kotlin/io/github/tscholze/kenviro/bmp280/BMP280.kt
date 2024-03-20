@@ -1,9 +1,7 @@
 package io.github.tscholze.kenviro.bmp280
 
-import io.github.tscholze.kenviro.Command
 import io.github.tscholze.kenviro.utils.toInt
 import io.ktgp.i2c.I2c
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlin.math.pow
 
 /**
@@ -14,12 +12,8 @@ import kotlin.math.pow
  * After usage the method [close] shall be called to clean up I2C usage.
  *
  * @param i2c I2C Controller to access pins.
- * @param actions Flow that shall be listened to for requested actions
  */
-class BMP280(
-    private var i2c: I2c,
-    private var actions: MutableSharedFlow<Command>,
-) {
+class BMP280(private var i2c: I2c) {
     // MARK: - Private properties -
 
     /** I2C device of the BMP2080 */
@@ -121,7 +115,10 @@ class BMP280(
         return part1 * part2
     }
 
-    fun close() {
+    // MARK: - System -
+
+    fun shutdown() {
+        print("Shutting down BMP280")
         i2c.close()
     }
 

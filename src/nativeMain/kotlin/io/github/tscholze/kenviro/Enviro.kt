@@ -2,40 +2,72 @@ package io.github.tscholze.kenviro
 
 import io.github.tscholze.kenviro.bmp280.BMP280
 import io.github.tscholze.kenviro.led.LEDs
+import io.github.tscholze.kenviro.server.runServer
+import io.github.tscholze.kenviro.tcs3472.TCS3472
 import io.ktgp.Gpio
 import io.ktgp.I2c
 import io.ktgp.use
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 
 class Enviro {
+    /**
+     * Runs the life cycle of the pHAT
+     */
     fun run() = runBlocking {
+
+        // Print greeting
+        println("""
+            # ------------------------------------------ #
+            # Kotlin Native + Raspberry Pi + Enviro pHAT #
+            # ------------------------------------------ #
+        """.trimIndent())
+
+        // Launch sensor readings
         launch {
-            val actions = MutableSharedFlow<Command>()
 
-
+            // Open GPIO connections
             Gpio().use { gpio ->
-                val leds = LEDs(gpio, actions)
-                leds.turnOff()
+                // Create and access to the LEDs
+                val leds = LEDs(gpio)
 
-
-                //  Create GPIO context with auto-release after use
+                // Open I2c connection
                 I2c(1).use { i2c ->
+                    // Create and access the BMP280
+                    val bmp280 = BMP280(i2c)
+                    val tcs3472 = TCS3472(i2c)
 
-                    // Create flow to collect and emit requested actions
+                    // Start server
+                    val server = runServer(leds, bmp280, tcs3472)
 
-                    //  manage
-                    val bmp280 = BMP280(i2c, actions)
-                    println("Temp: ${bmp280.readTemperature()} C")
-                    println("Pressure: ${bmp280.readPressure()} hPa")
-                    println("Altitude: ${bmp280.readAltitude()} m NN")
+                    println("")
+                    println("--- Environment reading START --")
+                    println("Temperature (C°): ${bmp280.readTemperature()}")
+                    println("Pressure (hPa): ${bmp280.readPressure()}")
+                    println("Altitude (m): ${bmp280.readAltitude()}")
+                    println("--- Sample reading END ----")
+                    println("")
+                    println("--- Ambient reading START --")
 
-                    bmp280.close()
+                    val rgb = tcs3472.readRGB()
+                    println("Values in range of 0 to 255")
+                    println("Red: ${rgb.red}")
+                    println("Blue: ${rgb.blue}")
+                    println("Green: ${rgb.clear}")
+                    println("--- Ambient reading END ----")
+                    println("")
+                    // Present a closable action
+                    println("Press any key to quit server")
+                    readln()
+
+                    // Stop gracefully
+                    server.stop()
+                    bmp280.shutdown()
+                    leds.shutdown()
+                    println("Bye bye.")
                 }
             }
-            println("---")
         }
     }
 }
