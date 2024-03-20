@@ -61,13 +61,6 @@ Green: 918.0
 Press any key to quit server
 ```
 
-## Links 
-
-
-https://github.com/taartspi/pi4j-example-devices/blob/master/src/main/java/com/pi4j/devices/bmp280/BMP280Device.java
-https://cdn-shop.adafruit.com/datasheets/BST-BMP280-DS001-11.pdf
-https://github.com/androidthings/contrib-drivers/blob/master/bmx280/src/main/java/com/google/android/things/contrib/driver/bmx280/Bmx280.java
-
 ## Keep in mind
 
 ### Calculations may be incorrect
