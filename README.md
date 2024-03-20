@@ -1,16 +1,18 @@
+![Logo](__docs/socialmedia.png)
+
 # Kpi.Enviro
 
 > A  program to understand how to work with Kotlin Native to access GPIO and I2c pins on a Raspberry Pi with the [Enviro pHAT](https://learn.pimoroni.com/article/getting-started-with-enviro-phat) attached. It also features a Ktor-based web interface`.
 
 ## tl;dr
 
-KPi.Enviro is a sample how to use Kotlin Native on a Raspberry Pi (64bit) to access and control attached [Pimoroni Enviro  pHAT](https://learn.pimoroni.com/article/getting-started-with-enviro-phat) using the GPIO and IC2 pins. It's build on top of the [ktgpio](https://github.com/ktgpio/ktgpio/) library. Not all sensors are used. The app accesses information of the BMP280 and TCS3472 chips.
+KPi.Enviro is part of the "**K** on Raspberry **Pi**" family and a sample how to use Kotlin Native on a Raspberry Pi (64bit) to access and control attached [Pimoroni Enviro  pHAT](https://learn.pimoroni.com/article/getting-started-with-enviro-phat) using the GPIO and IC2 pins. It's build on top of the [ktgpio](https://github.com/ktgpio/ktgpio/) library. Not all sensors are used. The app accesses information of the BMP280 and TCS3472 chips.
 
 ## Build status
 
-|Service|Status|
-|-------|------|
-|-|-|
+| Service       |Status|
+|---------------|-----|
+| GitHub Action |[![Java CI with Gradle](https://github.com/tscholze/kotlin-kpi-native-enviro/actions/workflows/gradle-build.yml/badge.svg)](https://github.com/tscholze/kotlin-kpi-native-enviro/actions/workflows/gradle-build.yml)|
 
 ## Requirements
 - Pimoroni Enviro pHAT
