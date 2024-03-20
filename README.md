@@ -2,7 +2,7 @@
 
 # Kpi.Enviro
 
-> A  program to understand how to work with Kotlin Native to access GPIO and I2c pins on a Raspberry Pi with the [Enviro pHAT](https://learn.pimoroni.com/article/getting-started-with-enviro-phat) attached. It also features a Ktor-based web interface`.
+> A  program to understand how to work with Kotlin Native to access GPIO and I2c pins on a Raspberry Pi with the [Enviro pHAT](https://learn.pimoroni.com/article/getting-started-with-enviro-phat) attached. It also features a Ktor-based web interface.
 
 ## tl;dr
 
