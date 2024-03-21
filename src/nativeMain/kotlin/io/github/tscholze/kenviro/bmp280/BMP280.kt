@@ -6,12 +6,12 @@ import kotlin.math.pow
 
 /**
  * Represents an BMP280 chip manager.
- * It allows the read temperature and pressure sensors
+ * It allows the read sensors for:
+ *  - Temperature
+ *  - Pressure
+ *  - Altitude
  *
- *
- * After usage the method [close] shall be called to clean up I2C usage.
- *
- * @param i2c I2C Controller to access pins.
+ * @param i2c I2C manager to access pins.
  */
 class BMP280(private var i2c: I2c) {
     // MARK: - Private properties -
@@ -32,20 +32,21 @@ class BMP280(private var i2c: I2c) {
         }
 
         // Get calibration information for sensors
-        calibration = CalibrationInformation(
-            device.read(REGISTER_DIGIT_TEMPERATURE_1, 2U).toInt() and 0xffff,
-            device.read(REGISTER_DIGIT_TEMPERATURE_2, 2U).toInt().toShort(),
-            device.read(REGISTER_DIGIT_TEMPERATURE_3, 2U).toInt().toShort(),
-            device.read(REGISTER_DIGIT_PRESSURE_1, 2U).toInt() and 0xffff,
-            device.read(REGISTER_DIGIT_PRESSURE_2, 2U).toInt().toShort(),
-            device.read(REGISTER_DIGIT_PRESSURE_3, 2U).toInt().toShort(),
-            device.read(REGISTER_DIGIT_PRESSURE_4, 2U).toInt().toShort(),
-            device.read(REGISTER_DIGIT_PRESSURE_5, 2U).toInt().toShort(),
-            device.read(REGISTER_DIGIT_PRESSURE_6, 2U).toInt().toShort(),
-            device.read(REGISTER_DIGIT_PRESSURE_7, 2U).toInt().toShort(),
-            device.read(REGISTER_DIGIT_PRESSURE_8, 2U).toInt().toShort(),
-            device.read(REGISTER_DIGIT_PRESSURE_9, 2U).toInt().toShort()
-        )
+        calibration =
+            CalibrationInformation(
+                device.read(REGISTER_DIGIT_TEMPERATURE_1, 2U).toInt() and 0xffff,
+                device.read(REGISTER_DIGIT_TEMPERATURE_2, 2U).toInt().toShort(),
+                device.read(REGISTER_DIGIT_TEMPERATURE_3, 2U).toInt().toShort(),
+                device.read(REGISTER_DIGIT_PRESSURE_1, 2U).toInt() and 0xffff,
+                device.read(REGISTER_DIGIT_PRESSURE_2, 2U).toInt().toShort(),
+                device.read(REGISTER_DIGIT_PRESSURE_3, 2U).toInt().toShort(),
+                device.read(REGISTER_DIGIT_PRESSURE_4, 2U).toInt().toShort(),
+                device.read(REGISTER_DIGIT_PRESSURE_5, 2U).toInt().toShort(),
+                device.read(REGISTER_DIGIT_PRESSURE_6, 2U).toInt().toShort(),
+                device.read(REGISTER_DIGIT_PRESSURE_7, 2U).toInt().toShort(),
+                device.read(REGISTER_DIGIT_PRESSURE_8, 2U).toInt().toShort(),
+                device.read(REGISTER_DIGIT_PRESSURE_9, 2U).toInt().toShort(),
+            )
     }
 
     // MARK: - Getters -
@@ -113,13 +114,6 @@ class BMP280(private var i2c: I2c) {
         val part2 = (temperature + 273.15) / 0.0065
 
         return part1 * part2
-    }
-
-    // MARK: - System -
-
-    fun shutdown() {
-        print("Shutting down BMP280")
-        i2c.close()
     }
 
     // MARK: - Companion -

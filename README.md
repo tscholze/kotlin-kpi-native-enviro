@@ -61,6 +61,10 @@ Green: 918.0
 Press any key to quit server
 ```
 
+## Scheme
+
+![Scheme](__docs/scheme.png)
+
 ## Keep in mind
 
 ### Calculations may be incorrect
