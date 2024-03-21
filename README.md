@@ -8,6 +8,10 @@
 
 KPi.Enviro is part of the "**K** on Raspberry **Pi**" family and a sample how to use Kotlin Native on a Raspberry Pi (64bit) to access and control attached [Pimoroni Enviro  pHAT](https://learn.pimoroni.com/article/getting-started-with-enviro-phat) using the GPIO and IC2 pins. It's build on top of the [ktgpio](https://github.com/ktgpio/ktgpio/) library. Not all sensors are used. The app accesses information of the BMP280 and TCS3472 chips.
 
+### Other KPi projects
+- [Kpi.Blinkt!](https://github.com/tscholze/kotlin-kpi-native-blinkt/) - Controlling a Pimoroni Blinkt! HAT
+- [Kpi.Enviro](https://github.com/tscholze/kotlin-kpi-native-blinkt) - Reading sensor values from a Pimoroni Enviro pHAT
+
 ## Build status
 
 | Service       |Status|
